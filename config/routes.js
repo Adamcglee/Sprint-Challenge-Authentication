@@ -1,6 +1,7 @@
 const axios = require("axios");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const jwtKey = require('../_secrets/keys').jwtKey;
 
 const { authenticate } = require("./middlewares");
 
@@ -13,8 +14,6 @@ module.exports = server => {
 
 const db = require("../database/dbConfig.js");
 
-const secret = "welcome to the jungle";
-
 function generateToken(user) {
   const payload = {
     username: user.username
@@ -24,7 +23,7 @@ function generateToken(user) {
     jwtid: "12345",
     subject: `${user.id}`
   };
-  return jwt.sign(payload, secret, options);
+  return jwt.sign(payload, jwtKey, options);
 }
 //test function to check server is running
 function  isRunning(req, res) {
