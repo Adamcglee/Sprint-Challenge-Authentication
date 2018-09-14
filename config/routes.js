@@ -5,6 +5,7 @@ const jwt = require("jsonwebtoken");
 const { authenticate } = require("./middlewares");
 
 module.exports = server => {
+  server.get("/", isRunning);
   server.post("/api/register", register);
   server.post("/api/login", login);
   server.get("/api/jokes", authenticate, getJokes);
@@ -25,6 +26,10 @@ function generateToken(user) {
   };
   return jwt.sign(payload, secret, options);
 }
+//test function to check server is running
+function  isRunning(req, res) {
+  res.send("Its Alive!!!");
+};
 
 function register(req, res) {
   // implement user registration
@@ -49,12 +54,28 @@ function register(req, res) {
         .catch(err => res.status(500).send(err));
     })
     .catch(err => res.status(500).send(err));
-};
+}
 
 function login(req, res) {
   // implement user login
   const creds = req.body;
-  db('users')
+  db("users")
+    .where({ username: creds.username })
+    .first()
+    .then(user => {
+      if (user && bcrypt.compareSync(creds.password, user.password)) {
+        const token = generateToken(user);
+        res.status(200).json({ message: "Login Succesful", token });
+      } else {
+        res
+          .status(401)
+          .json({
+            message:
+              "Unauthorized login attempt. Username or Password are incorrect."
+          });
+      }
+    })
+    .catch(err => res.status(500).send(err));
 }
 
 function getJokes(req, res) {
